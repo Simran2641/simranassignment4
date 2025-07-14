@@ -1,0 +1,123 @@
+# titanic_eda.py
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Setup
+sns.set(style="whitegrid")
+plt.rcParams["figure.figsize"] = (8, 5)
+
+# Load the Titanic dataset
+df = sns.load_dataset("titanic")
+
+# -------------------------------------
+# 1. DATA OVERVIEW
+# -------------------------------------
+print("\n🔹 Dataset Shape:", df.shape)
+print("\n🔹 Column Types:\n", df.dtypes)
+print("\n🔹 Sample Data:\n", df.head())
+
+# -------------------------------------
+# 2. MISSING VALUES ANALYSIS
+# -------------------------------------
+print("\n🔹 Missing Values:\n", df.isnull().sum())
+
+# Visualizing missing values
+sns.heatmap(df.isnull(), cbar=False, cmap="viridis")
+plt.title("Missing Value Heatmap")
+plt.savefig("1_missing_values.png")
+plt.close()
+
+# -------------------------------------
+# 3. DATA DISTRIBUTION
+# -------------------------------------
+
+# Age distribution
+sns.histplot(df['age'].dropna(), kde=True, bins=30)
+plt.title("Age Distribution")
+plt.xlabel("Age")
+plt.savefig("2_age_distribution.png")
+plt.close()
+
+# Fare distribution
+sns.histplot(df['fare'], kde=True, bins=30)
+plt.title("Fare Distribution")
+plt.xlabel("Fare")
+plt.savefig("3_fare_distribution.png")
+plt.close()
+
+# Categorical: Class distribution
+sns.countplot(x='pclass', data=df)
+plt.title("Passenger Class Distribution")
+plt.savefig("4_pclass_distribution.png")
+plt.close()
+
+# -------------------------------------
+# 4. OUTLIER DETECTION
+# -------------------------------------
+
+# Boxplot for Age
+sns.boxplot(x='age', data=df)
+plt.title("Boxplot: Age")
+plt.savefig("5_boxplot_age.png")
+plt.close()
+
+# Boxplot for Fare
+sns.boxplot(x='fare', data=df)
+plt.title("Boxplot: Fare")
+plt.savefig("6_boxplot_fare.png")
+plt.close()
+
+# -------------------------------------
+# 5. RELATIONSHIPS BETWEEN VARIABLES
+# -------------------------------------
+
+# Age vs Survival
+sns.boxplot(x='survived', y='age', data=df)
+plt.title("Survival vs Age")
+plt.savefig("7_survival_vs_age.png")
+plt.close()
+
+# Fare vs Survival
+sns.boxplot(x='survived', y='fare', data=df)
+plt.title("Survival vs Fare")
+plt.savefig("8_survival_vs_fare.png")
+plt.close()
+
+# Survival by Class and Gender
+sns.catplot(x="pclass", hue="sex", col="survived", data=df,
+            kind="count", height=4, aspect=1)
+plt.savefig("9_survival_pclass_gender.png")
+plt.close()
+
+# -------------------------------------
+# 6. CORRELATION HEATMAP
+# -------------------------------------
+
+# Encode categorical values
+df_encoded = df.copy()
+df_encoded["sex"] = df_encoded["sex"].map({"male": 0, "female": 1})
+df_encoded["embarked"] = df_encoded["embarked"].map({'S': 0, 'C': 1, 'Q': 2})
+df_encoded["alone"] = df_encoded["alone"].astype(int)
+
+# Drop non-numeric
+corr = df_encoded.corr(numeric_only=True)
+
+sns.heatmap(corr, annot=True, cmap="coolwarm", linewidths=0.5)
+plt.title("Correlation Heatmap")
+plt.savefig("10_correlation_heatmap.png")
+plt.close()
+
+# -------------------------------------
+# 7. SUMMARY OF INSIGHTS
+# -------------------------------------
+print("\n📌 INSIGHTS:")
+print("- Many passengers have missing age and cabin values.")
+print("- Age and fare have outliers, as shown in boxplots.")
+print("- Females and 1st-class passengers had higher survival rates.")
+print("- Strong positive correlation between survival and being female.")
+print("- Age shows a wide distribution, with many young passengers.")
+print("- Embarked and class also correlate with survival.")
+
+print("\n✅ All visualizations saved as PNG files.")
